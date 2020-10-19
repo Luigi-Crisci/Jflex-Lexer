@@ -7,7 +7,6 @@ import lexer.utils.Tokens;
 %class Lexer
 %line
 %char
-%state COMMENT
 %unicode
 
 %debug

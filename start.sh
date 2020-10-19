@@ -10,4 +10,5 @@ then
 fi
 
 echo "Processing file $1"
+mvn compile
 java -cp target/classes/ Lexer $1
