@@ -1,31 +1,32 @@
 import lexer.com.compiler.*;
-import lexer.utils.Tokens;
+import lexer.utils.Symbols;
 
 %%
 
 %public
 %class Lexer
 %line
-%char
+%column
 %unicode
-
 %debug
 
 %{
   StringBuffer string = new StringBuffer();
   
-  private Token constructToken(Tokens type) {
-    return new Token(type.name(),yytext());
+  private Symbol constructSymbol(int type) {
+    return new Symbol(type, yyline, yycolumn);
   }
-  private Token constructToken(Tokens type,String attribute) {
-    return new Token(type.name(),attribute);
+
+  private Symbol constructSymbol(int type, Object value) {
+  return new Symbol(type, yyline, yycolumn, value);
   }
 %}
 
 
-%type Token
+
+%type Symbol
 %eofval{
-    return constructToken(Tokens.EMPTY,"");
+    return constructSymbol(Symbols.EMPTY,"");
 %eofval}
 
 ALPHA=[A-Za-z]
@@ -45,27 +46,27 @@ STRING_TEXT = [^\"]*
 
 
 <YYINITIAL> {
-  {OPERATORS}     {return constructToken(Tokens.OP);}
-  ","             {return constructToken(Tokens.COLON);}    
-  ";"             {return constructToken(Tokens.S_COLON);}    
-  "("             {return constructToken(Tokens.L_PAR);}    
-  ")"             {return constructToken(Tokens.R_PAR);}    
-  "{"             {return constructToken(Tokens.L_CURLY);}    
-  "}"             {return constructToken(Tokens.R_CURLY);}    
+  {OPERATORS}     {return constructSymbol(Symbols.OP);}
+  ","             {return constructSymbol(Symbols.COLON);}    
+  ";"             {return constructSymbol(Symbols.S_COLON);}    
+  "("             {return constructSymbol(Symbols.L_PAR);}    
+  ")"             {return constructSymbol(Symbols.R_PAR);}    
+  "{"             {return constructSymbol(Symbols.L_CURLY);}    
+  "}"             {return constructSymbol(Symbols.R_CURLY);}    
   
   \"{STRING_TEXT}\" {
     String stringWithNoQuotes =  yytext().substring(1,yylength()-1);
-    return constructToken(Tokens.STRING,stringWithNoQuotes);
+    return constructSymbol(Symbols.STRING,stringWithNoQuotes);
   }
 
   \"{STRING_TEXT} {
     String stringWithNoQuotes =  yytext().substring(1,yylength());
-    return constructToken(Tokens.ERROR,stringWithNoQuotes);
+    return constructSymbol(Symbols.ERROR,stringWithNoQuotes);
   }
 
-  {FLOAT}         {return constructToken(Tokens.FLOAT);}
-  {INT}           {return constructToken(Tokens.INT);}
-  {ID}            {return constructToken(Tokens.ID);}
+  {FLOAT}         {return constructSymbol(Symbols.FLOAT);}
+  {INT}           {return constructSymbol(Symbols.INT);}
+  {ID}            {return constructSymbol(Symbols.ID);}
   
 
 }
@@ -73,5 +74,5 @@ STRING_TEXT = [^\"]*
 {NEWLINE} { }
 {WHITESPACE} { }
 
-[^] { return constructToken(Tokens.ERROR); }
+[^] { return constructSymbol(Symbols.ERROR); }
 
